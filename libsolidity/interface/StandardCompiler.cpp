@@ -145,7 +145,7 @@ bool isArtifactRequested(Json::Value const& _outputSelection, string const& _art
 /// the second level is the contract name and the value is an array of artifact names to be requested for that contract.
 /// @a _file is the current file
 /// @a _contract is the current contract
-/// @a _artifact is the current artifact name
+/// @a _artifacts is a list of artifact names
 ///
 /// @returns true if the @a _outputSelection has a match for the requested target in the specific file / contract.
 ///
@@ -153,7 +153,7 @@ bool isArtifactRequested(Json::Value const& _outputSelection, string const& _art
 ///
 /// @TODO optimise this. Perhaps flatten the structure upfront.
 ///
-bool isArtifactRequested(Json::Value const& _outputSelection, string const& _file, string const& _contract, string const& _artifact)
+bool isArtifactRequested(Json::Value const& _outputSelection, string const& _file, string const& _contract, vector<string> const& _artifacts)
 {
 	if (!_outputSelection.isObject())
 		return false;
@@ -167,20 +167,18 @@ bool isArtifactRequested(Json::Value const& _outputSelection, string const& _fil
 			for (auto const& contract: contracts)
 				if (
 					_outputSelection[file].isMember(contract) &&
-					_outputSelection[file][contract].isArray() &&
-					isArtifactRequested(_outputSelection[file][contract], _artifact)
+					_outputSelection[file][contract].isArray()
 				)
-					return true;
+					for (auto const& artifact: _artifacts)
+						if (isArtifactRequested(_outputSelection[file][contract], artifact))
+							return true;
 
 	return false;
 }
 
-bool isArtifactRequested(Json::Value const& _outputSelection, string const& _file, string const& _contract, vector<string> const& _artifacts)
+bool isArtifactRequested(Json::Value const& _outputSelection, string const& _file, string const& _contract, string const& _artifact)
 {
-	for (auto const& artifact: _artifacts)
-		if (isArtifactRequested(_outputSelection, _file, _contract, artifact))
-			return true;
-	return false;
+	return isArtifactRequested(_outputSelection, _file, _contract, vector<string>{ _artifact });
 }
 
 Json::Value formatLinkReferences(std::map<size_t, std::string> const& linkReferences)
