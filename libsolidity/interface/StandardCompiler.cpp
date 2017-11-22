@@ -158,14 +158,12 @@ bool isArtifactRequested(Json::Value const& _outputSelection, string const& _fil
 	if (!_outputSelection.isObject())
 		return false;
 
+	/// For SourceUnit-level targets (such as AST) only allow empty name, otherwise
+	/// for Contract-level targets try both contract name and wildcard
+	auto contracts = _contract.empty() ? initializer_list<string>{ _contract } : initializer_list<string>{ _contract, "*" };
+
 	for (auto const& file: { _file, string("*") })
 		if (_outputSelection.isMember(file) && _outputSelection[file].isObject())
-		{
-			/// For SourceUnit-level targets (such as AST) only allow empty name, otherwise
-			/// for Contract-level targets try both contract name and wildcard
-			vector<string> contracts{ _contract };
-			if (!_contract.empty())
-				contracts.push_back("*");
 			for (auto const& contract: contracts)
 				if (
 					_outputSelection[file].isMember(contract) &&
@@ -173,7 +171,6 @@ bool isArtifactRequested(Json::Value const& _outputSelection, string const& _fil
 					isArtifactRequested(_outputSelection[file][contract], _artifact)
 				)
 					return true;
-		}
 
 	return false;
 }
