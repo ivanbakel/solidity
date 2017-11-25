@@ -11,8 +11,6 @@ eth_policy()
 set(PROJECT_VERSION "0.4.19")
 project(solidity VERSION ${PROJECT_VERSION})
 
-option(SOLC_LINK_STATIC "Link solc executable statically on supported platforms" OFF)
-
 # Setup cccache.
 include(EthCcache)
 
@@ -42,14 +40,9 @@ configure_project(TESTS)
 
 add_subdirectory(libdevcore)
 add_subdirectory(libevmasm)
-add_subdirectory(libsolidity)
-add_subdirectory(solc)
+add_subdirectory(liblll)
+add_subdirectory(lllc)
 
-if (NOT EMSCRIPTEN)
-	add_subdirectory(liblll)
-	add_subdirectory(lllc)
-endif()
-
-if (TESTS AND NOT EMSCRIPTEN)
+if (TESTS)
 	add_subdirectory(test)
 endif()
